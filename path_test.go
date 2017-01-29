@@ -102,3 +102,49 @@ func TestAppend(t *testing.T) {
 	is.Equal(p1.Append(p3).String(), "/foo/bar/")
 	is.Equal(p1.Append(p2).String(), "/foo/bar/some/sub/path/")
 }
+
+func TestEveryPath(t *testing.T) {
+	// init
+	is := is.New(t)
+	allPaths := []string{
+		"one/",
+		"one/two/",
+		"one/two/three/",
+		"one/two/three/four/",
+		"one/two/three/four/five/",
+		"one/two/three/four/five/six/",
+		"one/two/three/four/five/six/seven/",
+		"one/two/three/four/five/six/seven/eight/",
+		"one/two/three/four/five/six/seven/eight/nine/",
+		"one/two/three/four/five/six/seven/eight/nine/ten/",
+		"one/two/three/four/five/six/seven/eight/nine/ten/eleven/",
+	}
+	allPathsAbs := []string{
+		"/one/",
+		"/one/two/",
+		"/one/two/three/",
+		"/one/two/three/four/",
+		"/one/two/three/four/five/",
+		"/one/two/three/four/five/six/",
+		"/one/two/three/four/five/six/seven/",
+		"/one/two/three/four/five/six/seven/eight/",
+		"/one/two/three/four/five/six/seven/eight/nine/",
+		"/one/two/three/four/five/six/seven/eight/nine/ten/",
+		"/one/two/three/four/five/six/seven/eight/nine/ten/eleven/",
+	}
+
+	testp := "one/two/three/four/five/six/seven/eight/nine/ten/eleven/"
+	testp_abs := "/one/two/three/four/five/six/seven/eight/nine/ten/eleven/"
+	// non-absolute path
+	p, err := path.New(testp)
+	is.NoErr(err)
+	for i, f := range p.EveryPath() {
+		is.Equal(allPaths[i], f)
+	}
+	// absolute path
+	p, err = path.New(testp_abs)
+	is.NoErr(err)
+	for i, f := range p.EveryPath() {
+		is.Equal(allPathsAbs[i], f)
+	}
+}

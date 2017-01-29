@@ -58,6 +58,30 @@ func (p *Path) String() string {
 	return string(*p)
 }
 
+// Returns true of path starts with Separator, false otherwise.
+func (p *Path) IsAbsolute() bool {
+	if len(*p) == 0 {
+		return false
+	}
+	return string(*p)[0:1] == Separator
+}
+
+func (p *Path) EveryPath() []string {
+	names := strings.Split(string(*p), Separator)
+	var paths []string
+	var working string
+	if p.IsAbsolute() {
+		working = Separator
+		names = names[1:]
+	}
+	names = names[:len(names)-1]
+	for _, n := range names {
+		working += n + Separator
+		paths = append(paths, working)
+	}
+	return paths
+}
+
 func deduplicateSlash(path string) string {
 	p := path
 	i := strings.Index(p, DoubleSeparator)
