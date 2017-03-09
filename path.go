@@ -2,43 +2,42 @@ package path
 
 import (
 	"errors"
-	"path/filepath"
+	slash "path"
 	"strings"
 )
 
 type Path string
 
-const Separator string = "/"
-const DoubleSeparator string = "//"
-
 // New creates a path from a string, with the following rules:
 //
 // Removes all URL prefixes.
-// Reduces two or more separators to one.
-// Appends a separator if there are no separators in the string.
-// Removes all characters after the last separator.
+// Reduces two or more "/" to one.
+// Appends a "/" if there are no "/" in the string.
+// Removes all characters after the last "/".
 //
 // If input is empty or nil, return nil path and error.
 //
 func New(path string) (*Path, error) {
-	path = removeUrlPrefix(path)
-	path = deduplicateSlash(path)
-
-	l := len(path)
-	switch {
-	case l == 0:
-		return nil, errors.New("Nil path.")
-	case path[l-1] == Separator[0]:
-		p := Path(path)
-		return &p, nil
-	case strings.Index(path, Separator) == -1:
-		p := Path(path + Separator)
-		return &p, nil // No slashes at all. Appending slash to end of string.
-	default:
-		d, _ := filepath.Split(path)
-		p := Path(d)
-		return &p, nil // No trailing slash. Removed last item in path.
+	if len(path) == 0 {
+		return nil, errors.New("empty path")
 	}
+	file := true
+	if path[len(path)-1:] == "/" {
+		file = false
+	}
+	path = removeUrlPrefix(path)
+	path = slash.Clean(path)
+	if strings.Index(path, "/") == -1 {
+		file = false
+	}
+	if file {
+		path = slash.Dir(path)
+	}
+	if len(path) > 1 {
+		path += "/"
+	}
+	p := Path(path)
+	return &p, nil
 }
 
 // Appends sub-path to path managing slashes appropriately.
@@ -46,7 +45,7 @@ func (p *Path) Append(subpath *Path) *Path {
 	if subpath == nil {
 		return p
 	}
-	path, _ := New(p.String() + Separator + subpath.String())
+	path, _ := New(p.String() + "/" + subpath.String())
 	return path
 }
 
@@ -58,40 +57,28 @@ func (p *Path) String() string {
 	return string(*p)
 }
 
-// Returns true of path starts with Separator, false otherwise.
+// Returns true of path starts with "/", false otherwise.
 func (p *Path) IsAbsolute() bool {
 	if len(*p) == 0 {
 		return false
 	}
-	return string(*p)[0:1] == Separator
+	return string(*p)[0:1] == "/"
 }
 
 func (p *Path) EveryPath() []string {
-	names := strings.Split(string(*p), Separator)
+	names := strings.Split(string(*p), "/")
 	var paths []string
 	var working string
 	if p.IsAbsolute() {
-		working = Separator
+		working = "/"
 		names = names[1:]
 	}
 	names = names[:len(names)-1]
 	for _, n := range names {
-		working += n + Separator
+		working += n + "/"
 		paths = append(paths, working)
 	}
 	return paths
-}
-
-func deduplicateSlash(path string) string {
-	p := path
-	i := strings.Index(p, DoubleSeparator)
-
-	for i != -1 {
-		// p = p[:i] + p[i+1:]
-		p = strings.Replace(p, DoubleSeparator, Separator, -1)
-		i = strings.Index(p, DoubleSeparator)
-	}
-	return p
 }
 
 func removeUrlPrefix(path string) string {

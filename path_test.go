@@ -24,12 +24,12 @@ func TestPath(t *testing.T) {
 		{
 			In:    nil,
 			Expct: addrString("<nil>"),
-			Error: errors.New("Nil path."),
+			Error: nil,
 		},
 		{
 			In:    addrString(""),
 			Expct: addrString("<nil>"),
-			Error: errors.New("Nil path."),
+			Error: errors.New("empty path"),
 		},
 		{
 			In:    addrString("foo.bar"),
@@ -96,7 +96,7 @@ func TestAppend(t *testing.T) {
 	p2, err := path.New("/some/sub/path/")
 	is.NoErr(err)
 	p3, err := path.New("")
-	is.Equal(err.Error(), "Nil path.")
+	is.Equal(err.Error(), "empty path")
 
 	is.Equal(p1.Append(nil).String(), "/foo/bar/")
 	is.Equal(p1.Append(p3).String(), "/foo/bar/")
