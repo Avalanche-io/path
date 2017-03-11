@@ -148,3 +148,51 @@ func TestEveryPath(t *testing.T) {
 		is.Equal(allPathsAbs[i], f)
 	}
 }
+
+func TestSplit(t *testing.T) {
+	is := is.New(t)
+	tests := []struct {
+		In    string
+		Expct []string
+		Error error
+	}{
+		{
+			In:    "foo.bar/",
+			Expct: []string{"", "foo.bar/"},
+			Error: nil,
+		},
+		{
+			In:    "/",
+			Expct: []string{"", "/"},
+			Error: nil,
+		},
+		{
+			In:    "bat/",
+			Expct: []string{"", "bat/"},
+			Error: nil,
+		},
+		{
+			In:    "/bat/",
+			Expct: []string{"/", "bat/"},
+			Error: nil,
+		},
+		{
+			In:    "/a/b/baz/bat/",
+			Expct: []string{"/a/b/baz/", "bat/"},
+			Error: nil,
+		},
+		{
+			In:    "/a/b/baz/bat/foo/",
+			Expct: []string{"/a/b/baz/bat/", "foo/"},
+			Error: nil,
+		},
+	}
+	for _, test := range tests {
+		p, err := path.New(test.In)
+		is.NoErr(err)
+		dir, name := p.Split()
+		is.Equal(dir, test.Expct[0])
+		is.Equal(name, test.Expct[1])
+	}
+
+}

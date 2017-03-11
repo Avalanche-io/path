@@ -81,6 +81,21 @@ func (p *Path) EveryPath() []string {
 	return paths
 }
 
+func (p *Path) Split() (string, string) {
+	if p == nil || len(string(*p)) == 0 {
+		return "", ""
+	}
+	path := string(*p)
+	if path[:1] != "/" {
+		path = "./" + path
+	}
+	d, n := slash.Split(path[:len(path)-1])
+	if d == "./" {
+		d = ""
+	}
+	return d, n + "/"
+}
+
 func removeUrlPrefix(path string) string {
 	p := path
 	if i := strings.LastIndex(path, ":"); i != -1 {
