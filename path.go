@@ -96,6 +96,13 @@ func (p *Path) Split() (string, string) {
 	return d, n + "/"
 }
 
+func IsDir(path string) bool {
+	if len(path) > 1 && path[len(path)-1:] == "/" {
+		return true
+	}
+	return false
+}
+
 func removeUrlPrefix(path string) string {
 	p := path
 	if i := strings.LastIndex(path, ":"); i != -1 {

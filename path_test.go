@@ -18,57 +18,57 @@ func TestPath(t *testing.T) {
 	is := is.New(t)
 	tests := []struct {
 		In    *string
-		Expct *string
+		Exp   *string
 		Error error
 	}{
 		{
 			In:    nil,
-			Expct: addrString("<nil>"),
+			Exp:   addrString("<nil>"),
 			Error: nil,
 		},
 		{
 			In:    addrString(""),
-			Expct: addrString("<nil>"),
+			Exp:   addrString("<nil>"),
 			Error: errors.New("empty path"),
 		},
 		{
 			In:    addrString("foo.bar"),
-			Expct: addrString("foo.bar/"),
+			Exp:   addrString("foo.bar/"),
 			Error: nil,
 		},
 		{
 			In:    addrString("/foo.bar"),
-			Expct: addrString("/"),
+			Exp:   addrString("/"),
 			Error: nil,
 		},
 		{
 			In:    addrString("foo.bar/"),
-			Expct: addrString("foo.bar/"),
+			Exp:   addrString("foo.bar/"),
 			Error: nil,
 		},
 		{
 			In:    addrString("bat/foo.bar"),
-			Expct: addrString("bat/"),
+			Exp:   addrString("bat/"),
 			Error: nil,
 		},
 		{
 			In:    addrString("/bat/foo.bar"),
-			Expct: addrString("/bat/"),
+			Exp:   addrString("/bat/"),
 			Error: nil,
 		},
 		{
 			In:    addrString("http://bat/foo.bar"),
-			Expct: addrString("/bat/"),
+			Exp:   addrString("/bat/"),
 			Error: nil,
 		},
 		{
 			In:    addrString("/a/b/baz/bat/foo.bar"),
-			Expct: addrString("/a/b/baz/bat/"),
+			Exp:   addrString("/a/b/baz/bat/"),
 			Error: nil,
 		},
 		{
 			In:    addrString("/a/b/baz/bat/foo/bar"),
-			Expct: addrString("/a/b/baz/bat/foo/"),
+			Exp:   addrString("/a/b/baz/bat/foo/"),
 			Error: nil,
 		},
 	}
@@ -83,7 +83,7 @@ func TestPath(t *testing.T) {
 			p, err = path.New(*tt.In)
 			is.Equal(err, tt.Error)
 		}
-		is.Equal(p.String(), *tt.Expct)
+		is.Equal(p.String(), *tt.Exp)
 	}
 }
 
@@ -152,47 +152,55 @@ func TestEveryPath(t *testing.T) {
 func TestSplit(t *testing.T) {
 	is := is.New(t)
 	tests := []struct {
-		In    string
-		Expct []string
-		Error error
+		In  string
+		Exp []string
 	}{
 		{
-			In:    "foo.bar/",
-			Expct: []string{"", "foo.bar/"},
-			Error: nil,
+			In:  "foo.bar/",
+			Exp: []string{"", "foo.bar/"},
 		},
 		{
-			In:    "/",
-			Expct: []string{"", "/"},
-			Error: nil,
+			In:  "/",
+			Exp: []string{"", "/"},
 		},
 		{
-			In:    "bat/",
-			Expct: []string{"", "bat/"},
-			Error: nil,
+			In:  "bat/",
+			Exp: []string{"", "bat/"},
 		},
 		{
-			In:    "/bat/",
-			Expct: []string{"/", "bat/"},
-			Error: nil,
+			In:  "/bat/",
+			Exp: []string{"/", "bat/"},
 		},
 		{
-			In:    "/a/b/baz/bat/",
-			Expct: []string{"/a/b/baz/", "bat/"},
-			Error: nil,
+			In:  "/a/b/baz/bat/",
+			Exp: []string{"/a/b/baz/", "bat/"},
 		},
 		{
-			In:    "/a/b/baz/bat/foo/",
-			Expct: []string{"/a/b/baz/bat/", "foo/"},
-			Error: nil,
+			In:  "/a/b/baz/bat/foo/",
+			Exp: []string{"/a/b/baz/bat/", "foo/"},
 		},
 	}
 	for _, test := range tests {
 		p, err := path.New(test.In)
 		is.NoErr(err)
 		dir, name := p.Split()
-		is.Equal(dir, test.Expct[0])
-		is.Equal(name, test.Expct[1])
+		is.Equal(dir, test.Exp[0])
+		is.Equal(name, test.Exp[1])
 	}
+}
 
+func TestIsDir(t *testing.T) {
+	is := is.New(t)
+	tests := []struct {
+		In  string
+		Exp bool
+	}{
+		{
+			In:  "foo.bar/",
+			Exp: true,
+		},
+	}
+	for _, test := range tests {
+		is.Equal(path.IsDir(test.In), test.Exp)
+	}
 }
